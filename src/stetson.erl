@@ -15,7 +15,9 @@
 -include("include/stetson.hrl").
 
 %% API
--export([counter/2,
+-export([start/0,
+         stop/0,
+         counter/2,
          counter/3,
          timer/2,
          timer/3]).
@@ -27,6 +29,14 @@
 %%
 %% API
 %%
+
+-spec start() -> ok.
+%% @doc
+start() -> application:start(?MODULE).
+
+-spec stop() -> ok.
+%% @doc
+stop() -> application:stop(?MODULE).
 
 -spec counter(atom(), pos_integer()) -> ok.
 %% @doc
