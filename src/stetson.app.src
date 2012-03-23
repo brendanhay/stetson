@@ -1,0 +1,14 @@
+{application, stetson, [
+    {description, "Stetson statsd client"},
+    {vsn, "0.1.0"},
+    {registered, []},
+    {applications, [
+        kernel,
+        stdlib
+    ]},
+    {mod, []},
+    {env, [
+        {statsd.uri, 'STATSD_URI'},
+        {graphite.ns, "stetson"}
+    ]}
+]}.
