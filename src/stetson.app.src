@@ -8,7 +8,7 @@
     ]},
     {mod, []},
     {env, [
-        {statsd.uri, 'STATSD_URI'},
+        {statsd.uri,  'STATSD_URI'},
         {graphite.ns, "stetson"}
     ]}
 ]}.
