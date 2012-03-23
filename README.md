@@ -9,7 +9,7 @@ Stetson
 Contribute
 ----------
 
-For any problems, comments or feedback please create an issue [here on GitHub](github.com/brendanhay/myxi/issues).
+For any problems, comments or feedback please create an issue [here on GitHub](github.com/brendanhay/stetson/issues).
 
 
 <a name="licence" />
@@ -17,4 +17,4 @@ For any problems, comments or feedback please create an issue [here on GitHub](g
 Licence
 -------
 
-Myxi is released under the [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/)
+Stetson is released under the [Mozilla Public License Version 2.0](http://www.mozilla.org/MPL/)
