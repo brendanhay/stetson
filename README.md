@@ -1,5 +1,5 @@
-Myxomatosis
-===========
+Stetson
+=======
 
 [![Build Status](https://secure.travis-ci.org/brendanhay/stetson.png)](http://travis-ci.org/brendanhay/stetson)
 
