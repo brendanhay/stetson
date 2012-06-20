@@ -28,8 +28,8 @@
 
 -type message() :: {connect, pid(), inet:socket(), erlang:timestamp()} |
                    {establish, pid(), node()} |
-                   {counter | gauge | timer, atom(), pos_integer()} |
-                   {counter | gauge | timer, atom(), pos_integer(), float()}.
+                   {counter | gauge | timer, atom(), integer()} |
+                   {counter | gauge | timer, atom(), integer(), float()}.
 
 -export_type([message/0]).
 
@@ -94,7 +94,7 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 %% Private
 %%
 
--spec stat(#s{}, counter | gauge | timer, string() | atom(), pos_integer(), float()) -> ok.
+-spec stat(#s{}, counter | gauge | timer, string() | atom(), integer(), float()) -> ok.
 %% @private Create a statistic entry with a sample rate
 stat(State, Type, Bucket, N, Rate) when Rate < 1.0 ->
     case {Type, random:uniform() =< Rate} of
@@ -104,7 +104,7 @@ stat(State, Type, Bucket, N, Rate) when Rate < 1.0 ->
         _               -> ok
     end.
 
--spec stat(#s{}, counter | gauge | timer, string() | atom(), pos_integer()) -> ok.
+-spec stat(#s{}, counter | gauge | timer, string() | atom(), integer()) -> ok.
 %% @doc Create a statistic entry with no sample rate
 stat(State, counter, Bucket, N) ->
     send(State, "~s:~p|c", [Bucket, N]);
