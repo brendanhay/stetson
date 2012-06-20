@@ -19,6 +19,8 @@
          stop/0,
          counter/2,
          counter/3,
+         gauge/2,
+         gauge/3,
          timer/2,
          timer/3]).
 
@@ -45,6 +47,14 @@ counter(Stat, Step) -> stetson_server:cast({counter, Stat, Step}).
 -spec counter(atom() | string(), pos_integer(), float()) -> ok.
 %% @doc
 counter(Bucket, Step, Rate) -> stetson_server:cast({counter, Bucket, Step, Rate}).
+
+-spec gauge(atom(), pos_integer()) -> ok.
+%% @doc
+gauge(Stat, Step) -> stetson_server:cast({gauge, Stat, Step}).
+
+-spec gauge(atom() | string(), pos_integer(), float()) -> ok.
+%% @doc
+gauge(Bucket, Step, Rate) -> stetson_server:cast({gauge, Bucket, Step, Rate}).
 
 -spec timer(atom() | string(), pos_integer()) -> ok.
 %% @doc
