@@ -8,7 +8,7 @@
     ]},
     {mod, []},
     {env, [
-        {statsd.uri,  'STATSD_URI'},
-        {graphite.ns, "stetson"}
+        {statsd.uri,  "localhost:8126"},
+        {graphite.ns, ""}
     ]}
 ]}.

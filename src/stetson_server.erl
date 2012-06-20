@@ -60,6 +60,7 @@ init({Uri, Ns}) ->
     process_flag(trap_exit, true),
     random:seed(now()),
     {Host, Port} = split_uri(Uri, 8126),
+    error_logger:info_msg("stetson will use statsd at ~s:~B", [Host, Port]),
     {ok, Sock} = gen_udp:open(0, [binary]),
     {ok, #s{sock = Sock, host = Host, port = Port, ns = Ns}}.
 
