@@ -16,8 +16,10 @@ build:
 	$(REBAR) compile
 	$(MAKE) xref
 
-doc:
-	$(REBAR) skip_deps=true doc
+test: build
+	rm -rf .eunit
+	$(REBAR) skip_deps=true eunit
+
 
 #
 # Run
