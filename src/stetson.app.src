@@ -6,7 +6,7 @@
         kernel,
         stdlib
     ]},
-    {mod, []},
+    {mod, {stetson, []}},
     {env, [
         {statsd.uri,  "localhost:8126"},
         {graphite.ns, ""}
