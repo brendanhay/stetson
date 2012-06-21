@@ -27,7 +27,7 @@
 -spec start_link(string(), string()) -> {ok, pid()} | ignore | {error, _}.
 %% @doc
 start_link(Uri, Ns) -> 
-    supervisor:start_link({local, ?MODULE}, ?MODULE, {Uri, Ns}).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, [Uri, Ns]).
 
 %%
 %% Callbacks
@@ -35,7 +35,7 @@ start_link(Uri, Ns) ->
 
 -spec init({string(), string()}) -> {ok, {{one_for_all, pos_integer(), pos_integer()}, [supervisor:child_spec()]}}.
 %% @hidden
-init(Config) ->
-    Spec = {stats, {stetson_server, start_link, [Config]},
+init([Uri, Ns]) ->
+    Spec = {stats, {stetson_server, start_link, [Uri, Ns]},
             permanent, 2000, worker, [stetson_server]},
     {ok, {{one_for_all, 100, 1}, [Spec]}}.
