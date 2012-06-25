@@ -60,11 +60,11 @@ cast(Msg) -> gen_server:cast(?SERVER, Msg).
 %% Callbacks
 %%
 
--spec init([string()]) -> {ok, #s{}}.
+-spec init([string(), ...]) -> {ok, #s{}}.
 %% @hidden
 init([Uri, Ns]) ->
     process_flag(trap_exit, true),
-    random:seed(now()),
+    _Ignore = random:seed(now()),
     {Host, Port} = split_uri(Uri, 8126),
     error_logger:info_msg("stetson will use statsd at ~s:~B~n", [Host, Port]),
     {ok, Sock} = gen_udp:open(0, [binary]),
@@ -134,7 +134,7 @@ split_uri(Uri, Default) ->
         [H|_]                    -> {H, Default}
     end.
 
--spec format(string(), string(), [string()]) -> string().
+-spec format(string(), string(), [any(), ...]) -> string().
 %% @private iolist_to_bin is used here even though gen_...:send variants
 %% accept deep iolists, since it's easier to debug on the wire.
 format([], Format, Args) ->

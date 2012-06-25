@@ -89,7 +89,7 @@ stop(_Args) -> ok.
 -spec env(atom(), any()) -> any().
 %% @doc
 env(Key, Default) ->
-    application:load(?MODULE),
+    _Ignore = application:load(?MODULE),
     case application:get_env(?MODULE, Key) of
         undefined   -> error({config_not_found, Key});
         {ok, Value} -> os(Value, Default)
