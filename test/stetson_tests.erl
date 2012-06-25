@@ -99,8 +99,6 @@ stetson_test_() ->
 %% Helpers
 %%
 
-putenv(Key, Value) -> os:putenv(atom_to_list(Key), Value).
-
 send_called(Msg) ->
     erlang:bump_reductions(2000), %% Force a context switch
     Expected = list_to_binary(string:join([?NS, Msg], ".")),
