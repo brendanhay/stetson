@@ -15,7 +15,7 @@
 -include("include/stetson.hrl").
 
 %% API
--export([start_link/1,
+-export([start_link/2,
          cast/1]).
 
 %% Callbacks
@@ -42,10 +42,10 @@
 %% API
 %%
 
--spec start_link({string(), string()}) -> ignore | {error, _} | {ok, pid()}.
+-spec start_link(string(), string()) -> ignore | {error, _} | {ok, pid()}.
 %% @doc Start the stats process
-start_link(Config) ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, Config, []).
+start_link(Uri, Ns) ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [Uri, Ns], []).
 
 -spec cast(message()) -> ok.
 cast(Msg) -> gen_server:cast(?SERVER, Msg).
@@ -54,13 +54,13 @@ cast(Msg) -> gen_server:cast(?SERVER, Msg).
 %% Callbacks
 %%
 
--spec init({string(), string()}) -> {ok, #s{}}.
+-spec init([string()]) -> {ok, #s{}}.
 %% @hidden
-init({Uri, Ns}) ->
+init([Uri, Ns]) ->
     process_flag(trap_exit, true),
     random:seed(now()),
     {Host, Port} = split_uri(Uri, 8126),
-    error_logger:info_msg("stetson will use statsd at ~s:~B", [Host, Port]),
+    error_logger:info_msg("stetson will use statsd at ~s:~B~n", [Host, Port]),
     {ok, Sock} = gen_udp:open(0, [binary]),
     {ok, #s{sock = Sock, host = Host, port = Port, ns = Ns}}.
 
