@@ -71,8 +71,8 @@ timer(Bucket, Ms, Rate) -> stetson_server:cast({timer, Bucket, Ms, Rate}).
 -spec start(normal, _Args) -> {ok, pid()} | {error, _}.
 %% @hidden
 start(normal, _Args) ->
-    Uri = env(statsd.uri, "localhost:8126"),
-    Ns  = env(graphite.ns, ""),
+    Uri = env(?STATSD_URI, "localhost:8126"),
+    Ns  = env(?GRAPHITE_NS, ""),
     case stetson_sup:start_link(Uri, Ns) of
         ignore -> {error, sup_returned_ignore};
         Ret    -> Ret

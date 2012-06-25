@@ -15,7 +15,8 @@
 -include("include/stetson.hrl").
 
 %% API
--export([start_link/2,
+-export([start/2,
+         start_link/2,
          cast/1]).
 
 %% Callbacks
@@ -42,8 +43,13 @@
 %% API
 %%
 
+-spec start(string(), string()) -> ignore | {error, _} | {ok, pid()}.
+%% @doc Start the stats process without a process link.
+start(Uri, Ns) ->
+    gen_server:start({local, ?SERVER}, ?MODULE, [Uri, Ns], []).
+
 -spec start_link(string(), string()) -> ignore | {error, _} | {ok, pid()}.
-%% @doc Start the stats process
+%% @doc Start the stats process in the standard OTP fashion.
 start_link(Uri, Ns) ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [Uri, Ns], []).
 
@@ -102,25 +108,20 @@ stat(State, Type, Bucket, N, Rate) when Rate < 1.0 ->
         {counter, true} -> send(State, "~s:~p|c|@~p",  [Bucket, N, Rate]);
         {gauge, true}   -> send(State, "~s:~p|g|@~p",  [Bucket, N, Rate]);
         {timer, true}   -> send(State, "~s:~p|ms|@~p", [Bucket, N, Rate]);
-        _               -> ok
+        _Ignore         -> ok
     end.
 
 -spec stat(#s{}, counter | gauge | timer, string() | atom(), integer()) -> ok.
 %% @doc Create a statistic entry with no sample rate
-stat(State, counter, Bucket, N) ->
-    send(State, "~s:~p|c", [Bucket, N]);
-stat(State, gauge, Bucket, N) ->
-    send(State, "~s:~p|g", [Bucket, N]);
-stat(State, timer, Bucket, N) ->
-    send(State, "~s:~p|ms", [Bucket, N]).
+stat(State, counter, Bucket, N)  -> send(State, "~s:~p|c", [Bucket, N]);
+stat(State, gauge, Bucket, N)    -> send(State, "~s:~p|g", [Bucket, N]);
+stat(State, timer, Bucket, N)    -> send(State, "~s:~p|ms", [Bucket, N]).
 
 -spec send(#s{}, string(), [atom() | non_neg_integer()]) -> ok.
 %% @private Send the formatted binary packet over the udp socket,
 %% prepending the ns/namespace
 send(#s{sock = Sock, host = Host, port = Port, ns = Ns}, Format, Args) ->
-    %% iolist_to_bin even though gen_...:send variants accept deep iolists,
-    %% since it makes logging and testing easier
-    Msg = iolist_to_binary(io_lib:format("~s." ++ Format, [Ns|Args])),
+    Msg = format(Ns, Format, Args),
     case gen_udp:send(Sock, Host, Port, Msg) of
         _Any -> ok
     end.
@@ -132,3 +133,13 @@ split_uri(Uri, Default) ->
         [H|P] when length(P) > 0 -> {H, list_to_integer(lists:flatten(P))};
         [H|_]                    -> {H, Default}
     end.
+
+-spec format(string(), string(), [string()]) -> string().
+%% @private iolist_to_bin is used here even though gen_...:send variants
+%% accept deep iolists, since it's easier to debug on the wire.
+format([], Format, Args) ->
+    iolist_to_binary(io_lib:format(Format, Args));
+format(Ns, Format, Args) ->
+    iolist_to_binary(io_lib:format("~s." ++ Format, [Ns|Args])).
+
+

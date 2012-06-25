@@ -8,5 +8,6 @@
 %% @doc
 %%
 
--define(SERVER, stetson_server).
-
+-define(SERVER,      stetson_server).
+-define(STATSD_URI,  statsd.uri).
+-define(GRAPHITE_NS, graphite.ns).
