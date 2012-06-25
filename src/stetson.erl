@@ -19,6 +19,8 @@
          stop/0,
          counter/2,
          counter/3,
+         gauge/2,
+         gauge/3,
          timer/2,
          timer/3]).
 
@@ -38,13 +40,21 @@ start() -> application:start(?MODULE).
 %% @doc
 stop() -> application:stop(?MODULE).
 
--spec counter(atom(), pos_integer()) -> ok.
+-spec counter(atom(), integer()) -> ok.
 %% @doc
 counter(Stat, Step) -> stetson_server:cast({counter, Stat, Step}).
 
--spec counter(atom() | string(), pos_integer(), float()) -> ok.
+-spec counter(atom() | string(), integer(), float()) -> ok.
 %% @doc
 counter(Bucket, Step, Rate) -> stetson_server:cast({counter, Bucket, Step, Rate}).
+
+-spec gauge(atom(), integer()) -> ok.
+%% @doc
+gauge(Stat, Step) -> stetson_server:cast({gauge, Stat, Step}).
+
+-spec gauge(atom() | string(), integer(), float()) -> ok.
+%% @doc
+gauge(Bucket, Step, Rate) -> stetson_server:cast({gauge, Bucket, Step, Rate}).
 
 -spec timer(atom() | string(), pos_integer()) -> ok.
 %% @doc
@@ -61,7 +71,9 @@ timer(Bucket, Ms, Rate) -> stetson_server:cast({timer, Bucket, Ms, Rate}).
 -spec start(normal, _Args) -> {ok, pid()} | {error, _}.
 %% @hidden
 start(normal, _Args) ->
-    case stetson_sup:start_link(env(statsd.uri), env(graphite.ns)) of
+    Uri = env(statsd.uri, "localhost:8126"),
+    Ns  = env(graphite.ns, ""),
+    case stetson_sup:start_link(Uri, Ns) of
         ignore -> {error, sup_returned_ignore};
         Ret    -> Ret
     end.
@@ -74,21 +86,24 @@ stop(_Args) -> ok.
 %% Private
 %%
 
--spec env(atom()) -> any().
+-spec env(atom(), any()) -> any().
 %% @doc
-env(Key) ->
+env(Key, Default) ->
     application:load(?MODULE),
     case application:get_env(?MODULE, Key) of
         undefined   -> error({config_not_found, Key});
-        {ok, Value} -> os(Value)
+        {ok, Value} -> os(Value, Default)
     end.
 
--spec os(atom() | string()) -> string().
-%% @doc
-os(Value) when is_atom(Value) ->
-    case os:getenv(atom_to_list(Value)) of
-        false -> error({env_not_set, Value});
+-spec os(atom() | string(), any()) -> string().
+%% @doc Try and retrieve an os ENV variable if the supplied key is
+%% an atom, falling back to the supplied default if it has not been set.
+os(Key, Default) when is_atom(Key) ->
+    case os:getenv(atom_to_list(Key)) of
+        false -> Default;
         Env   -> Env
     end;
-os(Value) ->
+%% Anything other than an atom as a key, is considered a valid value,
+%% and is returned as-is.
+os(Value, _Default) ->
     Value.

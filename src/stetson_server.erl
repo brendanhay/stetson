@@ -28,15 +28,15 @@
 
 -type message() :: {connect, pid(), inet:socket(), erlang:timestamp()} |
                    {establish, pid(), node()} |
-                   {counter | timer, atom(), pos_integer()} |
-                   {counter | timer, atom(), pos_integer(), float()}.
+                   {counter | gauge | timer, atom(), integer()} |
+                   {counter | gauge | timer, atom(), integer(), float()}.
 
 -export_type([message/0]).
 
 -record(s, {sock               :: gen_udp:socket(),
             host = "localhost" :: string(),
             port = 8126        :: inet:port_number(),
-            ns = ""            :: string()}).
+            ns   = ""          :: string()}).
 
 %%
 %% API
@@ -60,6 +60,7 @@ init({Uri, Ns}) ->
     process_flag(trap_exit, true),
     random:seed(now()),
     {Host, Port} = split_uri(Uri, 8126),
+    error_logger:info_msg("stetson will use statsd at ~s:~B", [Host, Port]),
     {ok, Sock} = gen_udp:open(0, [binary]),
     {ok, #s{sock = Sock, host = Host, port = Port, ns = Ns}}.
 
@@ -68,7 +69,7 @@ init({Uri, Ns}) ->
 handle_call(_Msg, _From, State) -> {reply, ok, State}.
 
 -spec handle_cast(message(), #s{}) -> {noreply, #s{}}.
-%% @hidden Send counter/timer
+%% @hidden Send counter/gauge/timer
 handle_cast({Type, Bucket, N}, State) ->
     ok = stat(State, Type, Bucket, N),
     {noreply, State};
@@ -94,19 +95,22 @@ code_change(_OldVsn, State, _Extra) -> {ok, State}.
 %% Private
 %%
 
--spec stat(#s{}, counter | timer, string() | atom(), pos_integer(), float()) -> ok.
+-spec stat(#s{}, counter | gauge | timer, string() | atom(), integer(), float()) -> ok.
 %% @private Create a statistic entry with a sample rate
 stat(State, Type, Bucket, N, Rate) when Rate < 1.0 ->
     case {Type, random:uniform() =< Rate} of
-        {counter, true} -> send(State, "~s:~p|c|@~p", [Bucket, N, Rate]);
+        {counter, true} -> send(State, "~s:~p|c|@~p",  [Bucket, N, Rate]);
+        {gauge, true}   -> send(State, "~s:~p|g|@~p",  [Bucket, N, Rate]);
         {timer, true}   -> send(State, "~s:~p|ms|@~p", [Bucket, N, Rate]);
         _               -> ok
     end.
 
--spec stat(#s{}, counter | timer, string() | atom(), pos_integer()) -> ok.
+-spec stat(#s{}, counter | gauge | timer, string() | atom(), integer()) -> ok.
 %% @doc Create a statistic entry with no sample rate
 stat(State, counter, Bucket, N) ->
     send(State, "~s:~p|c", [Bucket, N]);
+stat(State, gauge, Bucket, N) ->
+    send(State, "~s:~p|g", [Bucket, N]);
 stat(State, timer, Bucket, N) ->
     send(State, "~s:~p|ms", [Bucket, N]).
 
