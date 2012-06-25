@@ -1,6 +1,6 @@
 {application, stetson, [
     {description, "Stetson statsd client"},
-    {vsn, "0.1.1"},
+    {vsn, "0.1.2"},
     {registered, []},
     {applications, [
         kernel,
